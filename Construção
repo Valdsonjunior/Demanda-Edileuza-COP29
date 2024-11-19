@@ -1,0 +1,78 @@
+-- Passo 01 - Verificar satelites tb_firms
+SELECT DISTINCT
+satelite 
+FROM queimadas.tb_firms
+
+--Passo 02 - Conferir período disponível de dados novo satelite incluido - a partir de 2012-09-25
+Select *
+FROM queimadas.tb_firms
+WHERE "satelite" = 'NOAA-21'
+Order by "dt_aquisicao" 
+limit 100
+
+--Passo 03
+SELECT 
+	x.dt_aquisicao,
+	x.satelite,
+	x.geom
+FROM 
+	queimadas.tb_firms x
+JOIN
+	bases_auxiliares.ibge_bc250_lim_unidade_federacao_a y
+ON
+	ST_intersects(x.geom, y.geom)
+WHERE "satelite" != 'NOAA-21'
+	and x.dt_aquisicao::date >='2024-08-01'
+	and x.dt_aquisicao::date <='2024-08-31'
+	and y.sigla = 'PA'
+
+--Passo 04
+Select 
+	TO_CHAR(x.dt_aquisicao, 'YYYY/MM/DD')::date as data,
+	x.satelite,
+	x.geom
+FROM 
+	queimadas.tb_firms x
+JOIN
+	bases_auxiliares.ibge_bc250_lim_unidade_federacao_a y
+ON
+	ST_intersects(x.geom, y.geom)
+WHERE "satelite" != 'NOAA-21'
+	and x.dt_aquisicao::date >='2024-08-01'
+	and x.dt_aquisicao::date <='2024-08-31'
+	and y.sigla = 'PA'
+
+--Passo 05
+Select 
+	TO_CHAR(x.dt_aquisicao, 'YYYY/MM/DD')::date as data,
+	x.satelite,
+	COUNT(*) as focos
+FROM 
+	queimadas.tb_firms x
+JOIN
+	bases_auxiliares.ibge_bc250_lim_unidade_federacao_a y
+ON
+	ST_intersects(x.geom, y.geom)
+WHERE "satelite" != 'NOAA-21'
+	and x.dt_aquisicao::date >='2024-08-01'
+	and x.dt_aquisicao::date <='2024-08-31'
+	and y.sigla = 'PA'
+GROUP BY
+  	data, x.satelite
+
+--Passo 06
+Select 
+	TO_CHAR(x.dt_aquisicao, 'YYYY/MM/DD')::date as data,
+	COUNT(*) as focos
+FROM 
+	queimadas.tb_firms x
+JOIN
+	bases_auxiliares.ibge_bc250_lim_unidade_federacao_a y
+ON
+	ST_intersects(x.geom, y.geom)
+WHERE "satelite" != 'NOAA-21'
+	and x.dt_aquisicao::date >='2024-08-01'
+	and x.dt_aquisicao::date <='2024-08-31'
+	and y.sigla = 'PA'
+GROUP BY
+  	data
